@@ -5,6 +5,7 @@ import Radium from 'radium';
 import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import { visualization } from "../visualization/visualization";
+import { PhyloTree } from "../visualization/tree";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -37,12 +38,16 @@ class Tree extends React.Component {
     // foo: "bar"
   }
   componentDidMount() {
-    visualization(
-      this.props.tree.tree,
-      this.props.sequences.sequences,
-      this.props.frequencies.frequencies,
-      null /* todo: this is vaccineStrains */
-    )
+    var treeplot = d3.select("#treeplot")
+        .attr("width", 600)
+        .attr("height", 600);
+    PhyloTree(this.props.tree.tree, treeplot, d3.select('.treeplot-container'))
+//    visualization(
+//      this.props.tree.tree,
+//      this.props.sequences.sequences,
+//      this.props.frequencies.frequencies,
+//      null /* todo: this is vaccineStrains */
+//    )
   }
   getStyles() {
     return {
