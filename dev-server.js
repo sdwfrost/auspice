@@ -23,7 +23,8 @@ app.get("/Zika_meta", function(req, res) {
 });
 
 app.get("/Zika_tree", function(req, res) {
-  request("http://nextstrain.org/data/Zika_tree.json", function(err,r) {
+  //request("http://nextstrain.org/data/Zika_tree.json", function(err,r) {
+  request("http://flu.tuebingen.mpg.de/data/zika_tree.json", function(err,r) {
     if (err) {console.log('error getting data', err)}
     res.send(r.toJSON());
   });
