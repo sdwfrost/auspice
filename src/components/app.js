@@ -4,6 +4,7 @@ import {
   populateMetadataStore,
   populateTreeStore,
   populateSequencesStore,
+  populateEntropyStore,
   populateFrequenciesStore
 } from "../actions";
 
@@ -21,6 +22,7 @@ const returnStateNeeded = (fullStateTree) => {
   return {
     metadata: fullStateTree.metadata,
     tree: fullStateTree.tree,
+    entropy: fullStateTree.entropy,
     sequences: fullStateTree.sequences,
     frequencies: fullStateTree.frequencies
   };
@@ -55,6 +57,7 @@ class App extends React.Component {
     this.props.dispatch(populateMetadataStore());
     this.props.dispatch(populateTreeStore());
     this.props.dispatch(populateSequencesStore());
+    this.props.dispatch(populateEntropyStore());
     this.props.dispatch(populateFrequenciesStore());
   }
   drawTreeIfData() {
@@ -65,6 +68,7 @@ class App extends React.Component {
       p.metadata.metadata &&
       p.tree.tree &&
       p.sequences.sequences &&
+      p.entropy.entropy &&
       p.frequencies.frequencies
     ) {
       markup = (<Tree/>);

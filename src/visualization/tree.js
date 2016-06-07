@@ -1,8 +1,18 @@
-export const PhyloTree = (root, canvas, container) => {
+export const PhyloTree = (treeRoot) => {
+    var container = d3.select('.treeplot-container');
+    var canvas = d3.select("#treeplot")
+        .attr("width", 600)
+        .attr("height", 600);
+
     console.log('Enter tree.js');
     var tip_labels=false;
     var branch_labels=false;
     var timetree=false;
+    canvas.left_margin = 10;
+    canvas.bottom_margin = 16;
+    canvas.top_margin = 32;
+    if (branch_labels) {canvas.top_margin +=15;}
+    canvas.right_margin = 10;
 
     var virusTooltip = d3.tip()
         .direction('e')
@@ -223,14 +233,14 @@ export const PhyloTree = (root, canvas, container) => {
 
 
     var tree = d3.layout.tree();
-    var nodes = tree.nodes(root);
+    var nodes = tree.nodes(treeRoot);
     var links = tree.links(nodes);
-    links.push({"source":root, "target":root});
+    links.push({"source":treeRoot, "target":treeRoot});
     var tree_legend;
     var timetree=false;
     var xValues, yValues, tValues, currentXValues, xScale, yScale;
-    var rootNode = nodes[0];
-    var nDisplayTips, displayRoot=rootNode;
+    var treeRootNode = nodes[0];
+    var nDisplayTips, displayRoot=treeRootNode;
 
     var containerWidth = parseInt(container.style("width"), 10);
     var treeWidth = containerWidth;
@@ -241,11 +251,11 @@ export const PhyloTree = (root, canvas, container) => {
                      "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"];
 
 
-    displayRoot = rootNode;
-    var tips = gatherTips(rootNode, []);
+    displayRoot = treeRootNode;
+    var tips = gatherTips(treeRootNode, []);
 //    this.tips = tips;
 //    this.nodes = nodes;
-//    this.rootNode = rootNode;
+//    this.treeRootNode = treeRootNode;
 
     canvas.call(virusTooltip);
     canvas.call(linkTooltip);
@@ -283,10 +293,10 @@ export const PhyloTree = (root, canvas, container) => {
 //    this.setNodeState(this.earliestDate, this.latestDate);
 
     function treeSetUp(start, end){
-        calcFullTipCounts(rootNode);
-        rootNode.branch_length=0.001;
-        rootNode.tbranch_length=0.001;
-        calcBranchLength(rootNode);
+        calcFullTipCounts(treeRootNode);
+        treeRootNode.branch_length=0.001;
+        treeRootNode.tbranch_length=0.001;
+        calcBranchLength(treeRootNode);
         nDisplayTips = displayRoot.fullTipCount;
 
         xValues = nodes.map(function(d) {return +d.xvalue;});
@@ -303,7 +313,6 @@ export const PhyloTree = (root, canvas, container) => {
         yScale = d3.scale.linear()
             .domain([d3.min(yValues), d3.max(yValues)]);
         drawGrid();
-
         canvas.selectAll(".link")
             .data(links)
             .enter().append("polyline")
@@ -514,7 +523,7 @@ export const PhyloTree = (root, canvas, container) => {
 
         canvas.selectAll(".tip")
             .transition().duration(dt)
-            .attr("cx", function(d) { console.log(d.xvalue, xScale(d.xvalue)); return d.x; })
+            .attr("cx", function(d) { return d.x; })
             .attr("cy", function(d) { return d.y; });
 
         canvas.selectAll(".link")
@@ -593,7 +602,7 @@ export const PhyloTree = (root, canvas, container) => {
         xScale.range([canvas.left_margin, treeWidth - right_margin]);
         yScale.range([canvas.top_margin, treeHeight - canvas.bottom_margin]);
     }
-    console.log('got this far', root);
+    console.log('got this far', treeRoot);
 
     /*
      * rescale the tree to a window defined by the arguments
@@ -619,7 +628,7 @@ export const PhyloTree = (root, canvas, container) => {
     }
 
     function resetLayout () {
-        displayRoot = rootNode;
+        displayRoot = treeRootNode;
         nDisplayTips = displayRoot.fullTipCount;
         var dMin = d3.min(currentXValues),
             dMax = d3.max(currentXValues),

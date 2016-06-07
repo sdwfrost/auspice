@@ -7,6 +7,9 @@ export const TREE_FETCH_ERROR = "TREE_FETCH_ERROR";
 export const REQUEST_SEQUENCES = "REQUEST_SEQUENCES";
 export const RECEIVE_SEQUENCES = "RECEIVE_SEQUENCES";
 export const SEQUENCES_FETCH_ERROR = "SEQUENCES_FETCH_ERROR";
+export const REQUEST_ENTROPY = "REQUEST_ENTROPY";
+export const RECEIVE_ENTROPY = "RECEIVE_ENTROPY";
+export const ENTROPY_FETCH_ERROR = "ENTROPY_FETCH_ERROR";
 export const REQUEST_FREQUENCIES = "REQUEST_FREQUENCIES";
 export const RECEIVE_FREQUENCIES = "RECEIVE_FREQUENCIES";
 export const FREQUENCIES_FETCH_ERROR = "FREQUENCIES_FETCH_ERROR";
@@ -98,6 +101,8 @@ const receiveSequences = (data) => {
   };
 };
 
+
+
 const sequencesFetchError = (err) => {
   return {
     type: SEQUENCES_FETCH_ERROR,
@@ -118,6 +123,46 @@ export const populateSequencesStore = () => {
     );
   };
 };
+
+
+/* request entropy */
+
+const requestEntropy = () => {
+  return {
+    type: REQUEST_ENTROPY
+  };
+};
+
+const receiveEntropy = (data) => {
+  return {
+    type: RECEIVE_ENTROPY;
+    data: data
+  };
+};
+
+
+
+const entropyFetchError = (err) => {
+  return {
+    type: ENTROPY_FETCH_ERROR,
+    data: err
+  };
+};
+
+const fetchEntropy = () => {
+  return fetch("/Zika_entropy");
+};
+
+export const populateEntropyStore = () => {
+  return (dispatch) => {
+    dispatch(requestEntropy());
+    return fetchEntropy().then((res) => res.json()).then(
+      (json) => dispatch(receiveEntropy(JSON.parse(json.body))),
+      (err) => dispatch(entropyFetchError(err))
+    );
+  };
+};
+
 
 /* request frequencies */
 

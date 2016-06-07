@@ -6,12 +6,14 @@ import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import { visualization } from "../visualization/visualization";
 import { PhyloTree } from "../visualization/tree";
+import { diversityChart } from "../visualization/diversityChart";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     metadata: fullStateTree.metadata,
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
+    entropy: fullStateTree.entropy,
     frequencies: fullStateTree.frequencies
   }
 }
@@ -38,10 +40,8 @@ class Tree extends React.Component {
     // foo: "bar"
   }
   componentDidMount() {
-    var treeplot = d3.select("#treeplot")
-        .attr("width", 600)
-        .attr("height", 600);
-    PhyloTree(this.props.tree.tree, treeplot, d3.select('.treeplot-container'))
+    PhyloTree(this.props.tree.tree);
+    diversityChart(this.props.entropy.entropy, function (d){console.log('click',d);})
 //    visualization(
 //      this.props.tree.tree,
 //      this.props.sequences.sequences,
@@ -87,6 +87,7 @@ class Tree extends React.Component {
         <div id="updated"></div>
         <div id="commit"></div>
         <svg id="treeplot"> </svg>
+        <div id="entropy"> </div>
       </div>
     );
   }
