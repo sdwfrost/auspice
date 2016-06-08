@@ -135,7 +135,7 @@ const requestEntropy = () => {
 
 const receiveEntropy = (data) => {
   return {
-    type: RECEIVE_ENTROPY;
+    type: RECEIVE_ENTROPY,
     data: data
   };
 };

@@ -41,7 +41,7 @@ class Tree extends React.Component {
   }
   componentDidMount() {
     PhyloTree(this.props.tree.tree);
-    diversityChart(this.props.entropy.entropy, function (d){console.log('click',d);})
+    //diversityChart(this.props.entropy.entropy, function (d){console.log('click',d);})
 //    visualization(
 //      this.props.tree.tree,
 //      this.props.sequences.sequences,

@@ -68,8 +68,19 @@ class App extends React.Component {
       p.metadata.metadata &&
       p.tree.tree &&
       p.sequences.sequences &&
-      p.entropy.entropy &&
       p.frequencies.frequencies
+    ) {
+      markup = (<Tree/>);
+    }
+
+    return markup
+  }
+  drawDiversityIfData() {
+    const p = this.props;
+    let markup;
+
+    if (
+      p.entropy.entropy
     ) {
       markup = (<Tree/>);
     }

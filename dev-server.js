@@ -17,6 +17,7 @@ app.use(require("webpack-hot-middleware")(compiler));
 app.get("/Zika_meta", function(req, res) {
   request("http://nextstrain.org/data/Zika_meta.json", function(err,r) {
     if (err) {console.log('error getting data', err)}
+    console.log("meta:", r.toJSON());
     // console.log(r.toJSON())
     res.send(r.toJSON());
   });
@@ -34,6 +35,7 @@ app.get("/Zika_tree", function(req, res) {
 app.get("/Zika_entropy", function(req, res) {
   request("http://flu.tuebingen.mpg.de/data/zika_entropy.json", function(err,r) {
     if (err) {console.log('error getting data', err)}
+    console.log("entropy:", r.toJSON());
     res.send(r.toJSON());
   });
 });
