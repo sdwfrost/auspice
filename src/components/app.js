@@ -16,6 +16,7 @@ import Flex from "./framework/flex";
 import Header from "./header";
 import Controls from "./controls";
 import Tree from "./tree";
+import Diversity from "./diversityChart";
 import Footer from "./footer";
 
 const returnStateNeeded = (fullStateTree) => {
@@ -82,7 +83,7 @@ class App extends React.Component {
     if (
       p.entropy.entropy
     ) {
-      markup = (<Tree/>);
+      markup = (<Diversity/>);
     }
 
     return markup
@@ -106,6 +107,7 @@ class App extends React.Component {
           justifyContent="space-between">
           <Controls/>
           {this.drawTreeIfData()}
+          {this.drawDiversityIfData()}
         </Flex>
         <Footer/>
       </Flex>

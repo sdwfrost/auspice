@@ -1,9 +1,10 @@
 export const diversityChart = (entropy, callback) => {
+    console.log('enter diversityChart');
     var container = d3.select('.entropy-container');
     var canvas = '#entropy';
 
-    width = parseInt(container.style("width"), 10);
-    height = 250;
+    var width = 800; //parseInt(container.style("width"), 10);
+    var height = 250;
     console.log("diversity chart dimensions:", width, height);
 
     function generate(){
@@ -13,7 +14,8 @@ export const diversityChart = (entropy, callback) => {
         var posToAA = {};
         var ymin = 0;
         var xmax = 0;
-        var anno_count= 0
+        var anno_count= 0;
+        var x, gene, start, end;
         for (x in entropy){
             start = entropy[x]['pos'][0]; end = entropy[x]['pos'][entropy[x]['pos'].length-1];
             chart_data['x'+x+'anno'] = [start, 0.5*(start+end), end];
@@ -42,7 +44,7 @@ export const diversityChart = (entropy, callback) => {
         ymin-=0.1;
 
         var entropy_chart = c3.generate({
-            bindto: parent_div,
+            bindto: canvas,
             size: {width: width-10, height: height},
             onresize: function() {
                 width = parseInt(container.style("width"), 10);
@@ -128,5 +130,6 @@ export const diversityChart = (entropy, callback) => {
         });
     }
     generate();
+    console.log('chart: got to the end');
 }
 

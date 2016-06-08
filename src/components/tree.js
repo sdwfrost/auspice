@@ -6,7 +6,6 @@ import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import { visualization } from "../visualization/visualization";
 import { PhyloTree } from "../visualization/tree";
-import { diversityChart } from "../visualization/diversityChart";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
