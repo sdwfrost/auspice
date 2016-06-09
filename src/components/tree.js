@@ -5,7 +5,7 @@ import Radium from 'radium';
 import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import { visualization } from "../visualization/visualization";
-import { PhyloTree } from "../visualization/tree";
+import { PhyloTree } from "../visualization/phylotree";
 
 const returnStateNeeded = (fullStateTree) => {
   return {

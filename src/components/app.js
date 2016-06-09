@@ -15,7 +15,7 @@ import _ from "lodash";
 import Flex from "./framework/flex";
 import Header from "./header";
 import Controls from "./controls";
-import PhyloTree from "./phylotree";
+import Tree from "./tree";
 import Diversity from "./diversityChart";
 import Footer from "./footer";
 
