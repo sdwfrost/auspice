@@ -1,261 +1,289 @@
 export const PhyloTree = (treeRoot) => {
-    var container = d3.select('.treeplot-container');
-    var canvas = d3.select("#treeplot")
-        .attr("width", 600)
-        .attr("height", 600);
 
-    console.log('Enter tree.js');
-    var tip_labels=false;
-    var branch_labels=false;
-    var timetree=false;
-    canvas.left_margin = 10;
-    canvas.bottom_margin = 16;
-    canvas.top_margin = 32;
-    if (branch_labels) {canvas.top_margin +=15;}
-    canvas.right_margin = 10;
+  const container = d3.select('.treeplot-container');
 
-    var virusTooltip = d3.tip()
-        .direction('e')
-        .attr('class', 'd3-tip')
-        .offset([0, 12])
-        .html(function(d) {
+  const canvas = d3.select("#treeplot")
+    .attr("width", 600)
+    .attr("height", 600);
 
-            string = "";
+  let tip_labels = false;
+  let branch_labels = false;
+  let timetree = false;
 
-            // safe to assume the following attributes
-            if (typeof d.strain != "undefined") {
-                string += d.strain;
-            }
-            string += "<div class=\"smallspacer\"></div>";
+  canvas.left_margin = 10;
+  canvas.bottom_margin = 16;
+  canvas.top_margin = 32;
 
-            string += "<div class=\"smallnote\">";
+  if (branch_labels) {
+    canvas.top_margin += 15;
+  }
 
-            if (typeof d.country != "undefined") {
-                string += d.country.replace(/([A-Z])/g, ' $1');
-            }
-            if (typeof d.date != "undefined") {
-                string += ", " + d.date;
-            }
-            string += "</div>";
-            return string;
-        });
+  canvas.right_margin = 10;
 
+  /*
+    great place to componetize -
+    given tip going off the screen and d3.tip isn't handling that,
+    we should probably own this render logic and do it right
+  */
+  const virusTooltip = d3.tip()
+    .direction("e")
+    .attr("class", "d3-tip")
+    .offset([0, 12])
+    .html((d) => {
+      return `
+        ${typeof d.strain !== "undefined" ? d.strain : ""}
+        <div class="smallspacer"></div>
+        <div class="smallnote">
+        ${typeof d.country !== "undefined" ? d.country.replace(/([A-Z])/g, " $1") : ""}
+        ${typeof d.date !== "undefined" ? ", " : ""}
+        ${typeof d.date !== "undefined" ? d.date : ""}
+        </div>
+      `;
+    });
 
-    var linkTooltip = d3.tip()
-        .direction('e')
-        .attr('class', 'd3-tip')
-        .offset([0, 12])
-        .html(function(d) {
-            string = ""
-            if (typeof d.frequency != "undefined") {
-                string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
-            }
-            string += "<div class=\"smallspacer\"></div>";
-            string += "<div class=\"smallnote\">";
-            if ((typeof d.aa_muts !="undefined")&&(mutType=='aa')){
-                var ncount = 0;
-                for (tmp_gene in d.aa_muts) {ncount+=d.aa_muts[tmp_gene].length;}
-                if (ncount) {string += "<b>Mutations:</b><ul>";}
-                for (tmp_gene in d.aa_muts){
-                    if (d.aa_muts[tmp_gene].length){
-                        string+="<li>"+tmp_gene+":</b> "+d.aa_muts[tmp_gene].replace(/,/g, ', ') + "</li>";
-                    }
-                }
-            }
-            else if ((typeof d.nuc_muts !="undefined")&&(mutType=='nuc')&&(d.nuc_muts.length)){
-                var tmp_muts = d.muts.split(',');
-                var nmuts = tmp_muts.length;
-                tmp_muts = tmp_muts.slice(0,Math.min(10, nmuts))
-                string += "<li>"+tmp_muts.join(', ');
-                if (nmuts>10) {string+=' + '+ (nmuts-10) + ' more';}
-                string += "</li>";
-            }
-            string += "</ul>";
-            string += "click to zoom into clade"
-            string += "</div>";
-            return string;
-        });
+  /*
+    this is also a good case for a react component -
+    logic and markup together
+  */
+  const linkTooltip = d3.tip()
+    .direction("e")
+    .attr("class", "d3-tip")
+    .offset([0, 12])
+    .html((d) => {
+      let string = "";
+      if (typeof d.frequency != "undefined") {
+        string += "Frequency: " + (100 * d.frequency).toFixed(1) + "%"
+      }
+      string += "<div class=\"smallspacer\"></div>";
+      string += "<div class=\"smallnote\">";
+      if ((typeof d.aa_muts !== "undefined") && (mutType == 'aa')) {
 
-    function gatherTips(node, tips) {
-        if (typeof node.children != "undefined") {
-            for (var i=0, c=node.children.length; i<c; i++) {
-                gatherTips(node.children[i], tips);
-            }
+        let ncount = 0;
+
+        for (tmp_gene in d.aa_muts) {
+          ncount += d.aa_muts[tmp_gene].length;
         }
-        else {
-            tips.push(node);
+
+        if (ncount) {string += "<b>Mutations:</b><ul>";}
+
+        for (tmp_gene in d.aa_muts) {
+          if (d.aa_muts[tmp_gene].length) {
+            string += "<li>" + tmp_gene + ":</b> " + d.aa_muts[tmp_gene].replace(/,/g, ', ') + "</li>";
+          }
         }
-        return tips;
+      } else if (
+        (typeof d.nuc_muts !== "undefined") &&
+        (mutType === 'nuc') &&
+        (d.nuc_muts.length)
+      ) {
+        let tmp_muts = d.muts.split(',');
+        let nmuts = tmp_muts.length;
+        tmp_muts = tmp_muts.slice(0,Math.min(10, nmuts));
+        string += "<li>"+tmp_muts.join(', ');
+        if (nmuts>10) {string+=' + '+ (nmuts-10) + ' more';}
+        string += "</li>";
+      }
+      string += "</ul>";
+      string += "click to zoom into clade"
+      string += "</div>";
+      return string;
+    });
+
+  const gatherTips = (node, tips) => {
+    if (typeof node.children !== "undefined") {
+      for (let i = 0, c = node.children.length; i < c; i++) {
+        gatherTips(node.children[i], tips);
+      }
+    } else {
+      tips.push(node);
     }
+    return tips;
+  };
 
-    function minimumAttribute(node, attr, min) {
-        if (typeof node.children != "undefined") {
-            for (var i=0, c=node.children.length; i<c; i++) {
-                min = minimumAttribute(node.children[i], attr, min);
-            }
-        }
-        else {
-            if (node[attr] < min) {
-                min = node[attr];
-            }
-        }
-        return min;
+  const minimumAttribute = (node, attr, min) => {
+    if (typeof node.children !== "undefined") {
+      for (let i = 0, c = node.children.length; i < c; i++) {
+        min = minimumAttribute(node.children[i], attr, min);
+      }
+    } else if (node[attr] < min) {
+      min = node[attr];
     }
+    return min;
+  };
 
-    function maximumAttribute(node, attr, max) {
-        if (typeof node.children != "undefined") {
-            for (var i=0, c=node.children.length; i<c; i++) {
-                max = maximumAttribute(node.children[i], attr, max);
-            }
-        }
-        else {
-            if (node[attr] > max) {
-                max = node[attr];
-            }
-        }
-        return max;
+  const maximumAttribute = (node, attr, max) => {
+    if (typeof node.children !== "undefined") {
+      for (let i = 0, c = node.children.length; i < c; i++) {
+        max = maximumAttribute(node.children[i], attr, max);
+      }
+    } else if (node[attr] > max) {
+      max = node[attr];
     }
+    return max;
+  };
 
-    function calcBranchLength(node){
-        if (typeof node.children != "undefined") {
-        for (var i=0, c=node.children.length; i<c; i++) {
-            calcBranchLength(node.children[i]);
-            node.children[i].tbranch_length = node.children[i].tvalue-node.tvalue;
-            node.children[i].branch_length = node.children[i].xvalue-node.xvalue;
-        }
-        }
-    };
+  const calcBranchLength = (node) => {
+    if (typeof node.children !== "undefined") {
+      for (let i = 0, c = node.children.length; i < c; i++) {
+        calcBranchLength(node.children[i]);
+        node.children[i].tbranch_length = node.children[i].tvalue - node.tvalue;
+        node.children[i].branch_length = node.children[i].xvalue - node.xvalue;
+      }
+    }
+  };
 
     /**
-     * for each node, calculate the number of subtending tips (alive or dead)
+      for each node, calculate the number of subtending tips (alive or dead)
     **/
-    function calcFullTipCounts(node){
-        node.fullTipCount = 0;
-        if (typeof node.children != "undefined") {
-            for (var i=0; i<node.children.length; i++) {
-                calcFullTipCounts(node.children[i]);
-                node.fullTipCount += node.children[i].fullTipCount;
-            }
+    const calcFullTipCounts = (node) => {
+      node.fullTipCount = 0;
+      if (typeof node.children !== "undefined") {
+        for (let i = 0; i < node.children.length; i++) {
+          calcFullTipCounts(node.children[i]);
+          node.fullTipCount += node.children[i].fullTipCount;
         }
-        else {
-            node.fullTipCount = 1;
-        }
+      } else {
+        node.fullTipCount = 1;
+      }
     };
 
     /**
      * for each node, calculate the number of tips in the currently selected time window.
     **/
-    function calcTipCounts(node){
-        node.tipCount = 0;
-        if (typeof node.children != "undefined") {
-            for (var i=0; i<node.children.length; i++) {
-                calcTipCounts(node.children[i]);
-                node.tipCount += node.children[i].tipCount;
-            }
-        }
-        else if (node.current){
-            node.tipCount = 1;
-        }
-    };
+  const calcTipCounts = (node) => {
+    node.tipCount = 0;
+    if (typeof node.children !== "undefined") {
+      for (let i = 0; i < node.children.length; i++) {
+        calcTipCounts(node.children[i]);
+        node.tipCount += node.children[i].tipCount;
+      }
+    } else if (node.current) {
+      node.tipCount = 1;
+    }
+  };
 
     /**
-    sets each node in the tree to alive=true if it has at least one descendent with current=true
+      sets each node in the tree to alive=true if it has at least one descendent with current=true
     **/
-    function setNodeAlive(node){
-        if (typeof node.children != "undefined") {
-            var aliveChildren=false;
-            for (var i=0, c=node.children.length; i<c; i++) {
-                setNodeAlive(node.children[i]);
-                aliveChildren = aliveChildren||node.children[i].alive
-            }
-            node.alive = aliveChildren;
-        }else{
-            node.alive = node.current;
-        }
-    };
-
-
-    function branchLabelText(d) {
-        var tmp_str = d.aa_muts.replace(/,/g, ', ');
-        if (tmp_str.length>50){
-            return tmp_str.substring(0,45)+'...';
-        }
-        else {
-            return tmp_str;
-        }
+  const setNodeAlive = (node) => {
+    if (typeof node.children !== "undefined") {
+      let aliveChildren = false;
+      for (let i = 0, c = node.children.length; i < c; i++) {
+        setNodeAlive(node.children[i]);
+        aliveChildren = aliveChildren || node.children[i].alive;
+      }
+      node.alive = aliveChildren;
+    } else {
+      node.alive = node.current;
     }
+  };
 
-    function tipLabelText(d) {
-        if (d.strain.length>32){
-            return d.strain.substring(0,30)+'...';
-        }
-        else {
-            return d.strain;
-        }
+  const branchLabelText = (d) => {
+
+    const tmp_str = d.aa_muts.replace(/,/g, ', ');
+
+    if (tmp_str.length > 50) {
+      return tmp_str.substring(0,45) + '...';
+    } else {
+      return tmp_str;
     }
+  };
 
-    function branchLabelSize(d, n) {
-        if (d.fullTipCount>n/15) {
-            return "12px";
-        }
-        else {
-            return "0px";
-        }
+  const tipLabelText = (d) => {
+    if (d.strain.length > 32) {
+      return d.strain.substring(0,30) + '...';
+    } else {
+      return d.strain;
     }
+  };
 
-    function tipLabelSize(d, n) {
-        if (d.current){
-            if (n<25){
-                return 16;
-            }else if (n<50){
-                return 12;
-            }else if (n<75){
-                return 8;
-            }
-            else {
-                return 0;
-            }
-        }else{
-            return 0;
-        }
+  const branchLabelSize = (d, n) => {
+    if (d.fullTipCount > n / 15) {
+      return "12px";
+    } else {
+      return "0px";
     }
+  };
 
-    function tipLabelWidth(d, n){return tipLabelText(d).length * tipLabelSize(d, n) * 0.5;}
-    function tipFillColor(d)    {return d._selected?d3.rgb(d.col).brighter([0.45]):d3.rgb(d.col).brighter([0.65]);}
-    function tipStrokeColor(d)  {return d._selected?"#222222":d.col;}
-    function tipStrokeWidth(d)  {return d._selected?2:1;}
-    function tipRadius(d)  {return (d._highlight||d._selected)?6.0:4.0;}
-    //function tipRadius(d)  {return 4.0;}
-    function branchStrokeColor(d) {return d.col;}
-    function tipVisibility(d) { return d.current?"visible":"hidden";}
-    function branchStrokeWidth(d) {return 3;}
-    function treePlotHeight(width) {return 400 + 0.30*width;}
+  const tipLabelSize = (d, n) => {
+    let size;
+    if (d.current) {
+      if (n < 25) {
+        size = 16;
+      } else if (n < 50) {
+        size = 12;
+      } else if (n < 75) {
+        size = 8;
+      } else {
+        size = 0;
+      }
+    } else {
+      size = 0;
+    }
+    return size;
+  };
 
+  const tipLabelWidth = (d, n) => {
+    return tipLabelText(d).length * tipLabelSize(d, n) * 0.5;
+  };
+  const tipFillColor = (d) => {
+    return d._selected ?
+      d3.rgb(d.col).brighter([0.45]) :
+      d3.rgb(d.col).brighter([0.65]);
+  };
+  const tipStrokeColor = (d) => {
+    return d._selected ? "#222222" : d.col;
+  };
+  const tipStrokeWidth = (d) => {
+    return d._selected ? 2 : 1;
+  };
+  const tipRadius = (d) => {
+    return (d._highlight || d._selected) ? 6.0 : 4.0;
+  };
+  //const tipRadius = (d)  {return 4.0;};
+  const branchStrokeColor = (d) => {
+    return d.col;
+  };
+  const tipVisibility = (d) => {
+    return d.current ? "visible" : "hidden";
+  };
+  const branchStrokeWidth = (d) => {
+    return 3;
+  };
+  const treePlotHeight = (width) => {
+    return 400 + 0.30 * width;
+  };
 
-    var tree = d3.layout.tree();
-    var nodes = tree.nodes(treeRoot);
-    var links = tree.links(nodes);
-    links.push({"source":treeRoot, "target":treeRoot});
-    var tree_legend;
-    var timetree=false;
-    var xValues, yValues, tValues, currentXValues, xScale, yScale;
-    var treeRootNode = nodes[0];
-    var nDisplayTips, displayRoot=treeRootNode;
+  const tree = d3.layout.tree();
+  const nodes = tree.nodes(treeRoot);
+  const links = tree.links(nodes);
+  links.push({"source": treeRoot, "target": treeRoot});
+  let tree_legend;
+  // let timetree=false;
+  let xValues;
+  let yValues;
+  let tValues;
+  let currentXValues;
+  let xScale;
+  let yScale;
+  const treeRootNode = nodes[0];
+  let nDisplayTips;
+  let displayRoot = treeRootNode;
 
-    var containerWidth = parseInt(container.style("width"), 10);
-    var treeWidth = containerWidth;
-    var treeHeight = treePlotHeight(treeWidth);
-    var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
-    //this.zero_one = genericDomain;
-    var colors =    ["#4D92BF", "#5AA5A8", "#6BB18D", "#80B974", "#98BD5E", "#B1BD4E",
-                     "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"];
+  let containerWidth = parseInt(container.style("width"), 10);
+  let treeWidth = containerWidth;
+  let treeHeight = treePlotHeight(treeWidth);
+  const genericDomain = [0, 0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
+  //this.zero_one = genericDomain;
+  const colors = [
+    "#4D92BF", "#5AA5A8", "#6BB18D", "#80B974", "#98BD5E", "#B1BD4E",
+    "#C8B944", "#DAAC3D", "#E59738", "#E67732", "#E14F2A", "#DB2522"
+  ];
 
-
-    displayRoot = treeRootNode;
-    var tips = gatherTips(treeRootNode, []);
-//    this.tips = tips;
-//    this.nodes = nodes;
-//    this.treeRootNode = treeRootNode;
+  var tips = gatherTips(treeRootNode, []);
+//  this.tips = tips;
+//  this.nodes = nodes;
+//  this.treeRootNode = treeRootNode;
 
     canvas.call(virusTooltip);
     canvas.call(linkTooltip);
