@@ -15,7 +15,7 @@ import _ from "lodash";
 import Flex from "./framework/flex";
 import Header from "./header";
 import Controls from "./controls";
-import Tree from "./tree";
+import PhyloTree from "./phylotree";
 import Diversity from "./diversityChart";
 import Footer from "./footer";
 
@@ -107,7 +107,7 @@ class App extends React.Component {
           justifyContent="space-between">
           <Controls/>
           {this.drawTreeIfData()}
-          {this.drawDiversityIfData()}
+          {/*this.drawDiversityIfData()*/}
         </Flex>
         <Footer/>
       </Flex>
