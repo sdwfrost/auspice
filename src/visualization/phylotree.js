@@ -27,7 +27,6 @@ export const PhyloTree = (treeRoot) => {
   let displayRoot = treeRootNode;
   let containerWidth = parseInt(container.style("width"), 10);
   let treeWidth = containerWidth;
-  let treeHeight = treePlotHeight(treeWidth);
   const genericDomain = [0, 0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
   //this.zero_one = genericDomain;
   const colors = [
@@ -36,7 +35,6 @@ export const PhyloTree = (treeRoot) => {
   ];
   const yearTicks = [];
   const monthTicks = [];
-  const tips = gatherTips(treeRootNode, []);
 
   canvas.left_margin = 10;
   canvas.bottom_margin = 16;
@@ -283,6 +281,8 @@ export const PhyloTree = (treeRoot) => {
   const treePlotHeight = (width) => {
     return 400 + 0.30 * width;
   };
+  let treeHeight = treePlotHeight(treeWidth);
+  const tips = gatherTips(treeRootNode, []);
 
 //  this.tips = tips;
 //  this.nodes = nodes;
